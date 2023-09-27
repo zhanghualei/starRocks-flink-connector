@@ -1,0 +1,12 @@
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/exception/StarRocksSystemException.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/catalog/StarRocksCatalog.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/catalog/StarRocksTypeMapper.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/cfg/ConfigurationOptions.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/catalog/starRocks/StarRocksSystem.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/connection/JdbcConnectionProvider.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/catalog/StarRocksCatalogFactory.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/catalog/starRocks/StarRocksType.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/table/StarRocksConfigOptions.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/catalog/StarRocksCatalogOptions.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/cfg/StarRocksConnectionOptions.java
+/Users/hualei.zhang/data/code/private/code/starRocks-flink-connector/src/main/java/com/nio/starRocks/flink/connection/SimpleJdbcConnectionProvider.java
