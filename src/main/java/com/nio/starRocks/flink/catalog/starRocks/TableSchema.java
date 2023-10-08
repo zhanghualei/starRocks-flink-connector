@@ -27,7 +27,7 @@ public class TableSchema {
     private String tableComment;
     private Map<String, FieldSchema> fields;
     private List<String> keys = new ArrayList<>();
-    private DataModel model = DataModel.DUPLICATE;
+    private DataModel model = DataModel.DUPLICATE;//创建表时候默认使用的是duplicate模型
     private List<String> distributeKeys = new ArrayList<>();
     private Map<String, String> properties = new HashMap<>();
 

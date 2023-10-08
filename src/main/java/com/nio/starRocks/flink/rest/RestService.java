@@ -264,11 +264,11 @@ public class RestService implements Serializable {
     }
 
     /**
-     * choice a Doris BE node to request.
+     * choice a StarRocks BE node to request.
      *
      * @param options configuration of request
      * @param logger  slf4j logger
-     * @return the chosen one Doris BE node
+     * @return the chosen one StarRocks BE node
      * @throws IllegalArgumentException BE nodes is illegal
      */
     @VisibleForTesting
@@ -293,11 +293,11 @@ public class RestService implements Serializable {
     }
 
     /**
-     * get Doris BE nodes to request.
+     * get StarRocks BE nodes to request.
      *
      * @param options configuration of request
      * @param logger  slf4j logger
-     * @return the chosen one Doris BE node
+     * @return the chosen one StarRocks BE node
      * @throws IllegalArgumentException BE nodes is illegal
      *
      * This method is deprecated. Because it needs ADMIN_PRIV to get backends, which is not suitable for common users.
@@ -323,15 +323,15 @@ public class RestService implements Serializable {
         try {
             backend = mapper.readValue(response, Backend.class);
         } catch (JsonParseException e) {
-            String errMsg = "Doris BE's response is not a json. res: " + response;
+            String errMsg = "StarRocks BE's response is not a json. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksException(errMsg, e);
         } catch (JsonMappingException e) {
-            String errMsg = "Doris BE's response cannot map to schema. res: " + response;
+            String errMsg = "StarRocks BE's response cannot map to schema. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksException(errMsg, e);
         } catch (IOException e) {
-            String errMsg = "Parse Doris BE's response to json failed. res: " + response;
+            String errMsg = "Parse StarRocks BE's response to json failed. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksException(errMsg, e);
         }
@@ -346,11 +346,11 @@ public class RestService implements Serializable {
     }
 
     /**
-     * get Doris BE nodes to request.
+     * get StarRocks BE nodes to request.
      *
      * @param options configuration of request
      * @param logger  slf4j logger
-     * @return the chosen one Doris BE node
+     * @return the chosen one StarRocks BE node
      * @throws IllegalArgumentException BE nodes is illegal
      */
     public static List<BackendV2.BackendRowV2> getBackendsV2(StarRocksOptions options, StarRocksReadOptions readOptions, Logger logger) {
@@ -365,10 +365,10 @@ public class RestService implements Serializable {
                 List<BackendV2.BackendRowV2> backends = parseBackendV2(response, logger);
                 return backends;
             } catch (ConnectedFailedException e) {
-                logger.info("Doris FE node {} is unavailable: {}, Request the next Doris FE node", feNode, e.getMessage());
+                logger.info("StarRocks FE node {} is unavailable: {}, Request the next StarRocks FE node", feNode, e.getMessage());
             }
         }
-        String errMsg = "No Doris FE is available, please check configuration";
+        String errMsg = "No StarRocks FE is available, please check configuration";
         logger.error(errMsg);
         throw new StarRocksRuntimeException(errMsg);
     }
@@ -379,15 +379,15 @@ public class RestService implements Serializable {
         try {
             backend = mapper.readValue(response, BackendV2.class);
         } catch (JsonParseException e) {
-            String errMsg = "Doris BE's response is not a json. res: " + response;
+            String errMsg = "StarRocks BE's response is not a json. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksRuntimeException(errMsg, e);
         } catch (JsonMappingException e) {
-            String errMsg = "Doris BE's response cannot map to schema. res: " + response;
+            String errMsg = "StarRocks BE's response cannot map to schema. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksRuntimeException(errMsg, e);
         } catch (IOException e) {
-            String errMsg = "Parse Doris BE's response to json failed. res: " + response;
+            String errMsg = "Parse StarRocks BE's response to json failed. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksRuntimeException(errMsg, e);
         }
@@ -402,7 +402,7 @@ public class RestService implements Serializable {
     }
 
     /**
-     * get a valid URI to connect Doris FE.
+     * get a valid URI to connect StarRocks FE.
      *
      * @param options configuration of request
      * @param logger  {@link Logger}
@@ -420,7 +420,7 @@ public class RestService implements Serializable {
     }
 
     /**
-     * discover StarRocks table schema from Doris FE.
+     * discover StarRocks table schema from StarRocks FE.
      *
      * @param options configuration of request
      * @param logger  slf4j logger
@@ -460,15 +460,15 @@ public class RestService implements Serializable {
         try {
             schema = mapper.readValue(response, Schema.class);
         } catch (JsonParseException e) {
-            String errMsg = "Doris FE's response is not a json. res: " + response;
+            String errMsg = "StarRocks FE's response is not a json. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksException(errMsg, e);
         } catch (JsonMappingException e) {
-            String errMsg = "Doris FE's response cannot map to schema. res: " + response;
+            String errMsg = "StarRocks FE's response cannot map to schema. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksException(errMsg, e);
         } catch (IOException e) {
-            String errMsg = "Parse Doris FE's response to json failed. res: " + response;
+            String errMsg = "Parse StarRocks FE's response to json failed. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksException(errMsg, e);
         }
@@ -479,7 +479,7 @@ public class RestService implements Serializable {
         }
 
         if (schema.getStatus() != REST_RESPONSE_STATUS_OK) {
-            String errMsg = "Doris FE's response is not OK, status is " + schema.getStatus();
+            String errMsg = "StarRocks FE's response is not OK, status is " + schema.getStatus();
             logger.error(errMsg);
             throw new StarRocksException(errMsg);
         }
@@ -542,15 +542,15 @@ public class RestService implements Serializable {
         try {
             queryPlan = mapper.readValue(response, QueryPlan.class);
         } catch (JsonParseException e) {
-            String errMsg = "Doris FE's response is not a json. res: " + response;
+            String errMsg = "StarRocks FE's response is not a json. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksException(errMsg, e);
         } catch (JsonMappingException e) {
-            String errMsg = "Doris FE's response cannot map to schema. res: " + response;
+            String errMsg = "StarRocks FE's response cannot map to schema. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksException(errMsg, e);
         } catch (IOException e) {
-            String errMsg = "Parse Doris FE's response to json failed. res: " + response;
+            String errMsg = "Parse StarRocks FE's response to json failed. res: " + response;
             logger.error(errMsg, e);
             throw new StarRocksException(errMsg, e);
         }
@@ -561,7 +561,7 @@ public class RestService implements Serializable {
         }
 
         if (queryPlan.getStatus() != REST_RESPONSE_STATUS_OK) {
-            String errMsg = "Doris FE's response is not OK, status is " + queryPlan.getStatus();
+            String errMsg = "StarRocks FE's response is not OK, status is " + queryPlan.getStatus();
             logger.error(errMsg);
             throw new StarRocksException(errMsg);
         }
@@ -610,7 +610,7 @@ public class RestService implements Serializable {
                 }
             }
             if (target == null) {
-                String errMsg = "Cannot choice Doris BE for tablet " + tabletId;
+                String errMsg = "Cannot choice StarRocks BE for tablet " + tabletId;
                 logger.error(errMsg);
                 throw new StarRocksException(errMsg);
             }
@@ -648,7 +648,7 @@ public class RestService implements Serializable {
      *
      * @param options          configuration of request
      * @param be2Tablets       BE to tablets {@link Map}
-     * @param opaquedQueryPlan StarRocks BE execute plan getting from Doris FE
+     * @param opaquedQueryPlan StarRocks BE execute plan getting from StarRocks FE
      * @param database         database name of StarRocks table
      * @param table            table name of StarRocks table
      * @param logger           {@link Logger}

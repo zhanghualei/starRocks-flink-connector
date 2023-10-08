@@ -18,7 +18,7 @@ package com.nio.starRocks.flink.rest;
 
 import com.nio.starRocks.flink.rest.models.Field;
 import com.nio.starRocks.flink.rest.models.Schema;
-//import com.nio.starRocks.sdk.thrift.TScanColumnDesc;
+import com.starrocks.thrift.TScanColumnDesc;
 
 import java.util.List;
 

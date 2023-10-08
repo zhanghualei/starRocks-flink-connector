@@ -146,6 +146,12 @@ public class StarRocksSystem {
 
         Map<String, FieldSchema> fields = schema.getFields();
         List<String> keys = schema.getKeys();
+
+        for (String key : keys) {
+            System.out.println(key);
+        }
+
+
         //append keys
         for(String key : keys){
             if(!fields.containsKey(key)){
@@ -184,7 +190,7 @@ public class StarRocksSystem {
         //append distribute key
         sb.append(" DISTRIBUTED BY HASH(")
                 .append(String.join(",", identifier(schema.getDistributeKeys())))
-                .append(") BUCKETS AUTO ");
+                .append(") BUCKETS 8 ");//此处将创建表时候的桶的数量限定为2,也可以通过传递参数进行修改
 
         //append properties
         int index = 0;

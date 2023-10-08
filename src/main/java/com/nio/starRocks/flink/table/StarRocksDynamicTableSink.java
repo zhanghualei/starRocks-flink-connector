@@ -49,7 +49,7 @@ import static com.nio.starRocks.flink.sink.writer.LoadConstants.FIELD_DELIMITER_
 import static com.nio.starRocks.flink.sink.writer.LoadConstants.FORMAT_KEY;
 
 /**
- * DorisDynamicTableSink
+ * StarRocksDynamicTableSink
  **/
 public class StarRocksDynamicTableSink implements DynamicTableSink {
     private static final Logger LOG = LoggerFactory.getLogger(StarRocksDynamicTableSink.class);
@@ -111,8 +111,8 @@ public class StarRocksDynamicTableSink implements DynamicTableSink {
         }else{
             StarRocksBatchSink.Builder<RowData> starRocksBatchSinkBuilder = StarRocksBatchSink.builder();
             starRocksBatchSinkBuilder.setStarRocksOptions(options)
-                    .setDorisReadOptions(readOptions)
-                    .setDorisExecutionOptions(executionOptions)
+                    .setStarRocksReadOptions(readOptions)
+                    .setStarRocksExecutionOptions(executionOptions)
                     .setSerializer(serializerBuilder.build());
             return SinkV2Provider.of(starRocksBatchSinkBuilder.build(), sinkParallelism);
         }
@@ -125,6 +125,6 @@ public class StarRocksDynamicTableSink implements DynamicTableSink {
 
     @Override
     public String asSummaryString() {
-        return "Doris Table Sink";
+        return "StarRocks Table Sink";
     }
 }

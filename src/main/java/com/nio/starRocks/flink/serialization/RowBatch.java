@@ -38,7 +38,7 @@ import com.nio.starRocks.flink.exception.StarRocksException;
 import com.nio.starRocks.flink.exception.StarRocksRuntimeException;
 import com.nio.starRocks.flink.rest.models.Schema;
 //import org.apache.doris.sdk.thrift.TScanBatchResult;
-import com.nio.starRocks.sdk.thrift.TScanBatchResult;
+import com.starrocks.thrift.TScanBatchResult;
 import org.apache.flink.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -17,6 +17,7 @@ package com.nio.starRocks.flink.catalog;
 // specific language governing permissions and limitations
 // under the License.
 
+import com.nio.starRocks.flink.table.StarRocksDynamicTableFactory;
 import org.apache.commons.compress.utils.Lists;
 import com.nio.starRocks.flink.catalog.starRocks.DataModel;
 import com.nio.starRocks.flink.catalog.starRocks.StarRocksSystem;
@@ -118,10 +119,10 @@ public class StarRocksCatalog extends AbstractCatalog {
         }
     }
 
-//    @Override
-//    public Optional<Factory> getFactory() {
-//        return Optional.of(new StarRocksDynamicTableFactory());
-//    }
+    @Override
+    public Optional<Factory> getFactory() {
+        return Optional.of(new StarRocksDynamicTableFactory());
+    }
 
     // ------------- databases -------------
 
@@ -223,8 +224,8 @@ public class StarRocksCatalog extends AbstractCatalog {
         props.put(PASSWORD.key(), connectionOptions.getPassword());
         props.put(TABLE_IDENTIFIER.key(), databaseName + "." + tableName);
 
-        String labelPrefix = props.getOrDefault(SINK_LABEL_PREFIX.key(),"");
-        props.put(SINK_LABEL_PREFIX.key(), String.join("_",labelPrefix,databaseName,tableName));
+        String labelPrefix = props.getOrDefault(SINK_LABEL_PREFIX.key(), "");
+        props.put(SINK_LABEL_PREFIX.key(), String.join("_", labelPrefix, databaseName, tableName));
         //remove catalog option
         props.remove(DEFAULT_DATABASE.key());
         return CatalogTable.of(createTableSchema(databaseName, tableName), null, Lists.newArrayList(), props);
@@ -329,18 +330,16 @@ public class StarRocksCatalog extends AbstractCatalog {
         if (!IDENTIFIER.equals(options.get(CONNECTOR.key()))) {
             return;
         }
-
         List<String> primaryKeys = getCreateStarRocksKeys(table.getSchema());
         TableSchema schema = new TableSchema();
         schema.setDatabase(tablePath.getDatabaseName());
         schema.setTable(tablePath.getObjectName());
         schema.setTableComment(table.getComment());
-        schema.setFields(getCreateStarRocksColumns(table.getSchema()));
+        schema.setFields(getCreateStarRocksColumns(table.getSchema()));//这部分中应该包含了type相关的内容
         schema.setKeys(primaryKeys);
-        schema.setModel(DataModel.UNIQUE);//此处指定创建的表的类型为主键模型
+        schema.setModel(DataModel.UNIQUE);//此处指定创建的表的类型为UNIQUE模型
         schema.setDistributeKeys(primaryKeys);
         schema.setProperties(getCreateTableProps(options));
-
         starRocksSystem.createTable(schema);
     }
 
@@ -352,7 +351,6 @@ public class StarRocksCatalog extends AbstractCatalog {
     public Map<String, FieldSchema> getCreateStarRocksColumns(org.apache.flink.table.api.TableSchema schema){
         String[] fieldNames = schema.getFieldNames();
         DataType[] fieldTypes = schema.getFieldDataTypes();
-
         Map<String, FieldSchema> fields = new LinkedHashMap<>();
         for (int i = 0; i < fieldNames.length; i++) {
             fields.put(fieldNames[i],

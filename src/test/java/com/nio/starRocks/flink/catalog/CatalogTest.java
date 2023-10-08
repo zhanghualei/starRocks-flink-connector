@@ -153,8 +153,10 @@ public class CatalogTest {
 
     /**
      * Caused by: java.sql.SQLSyntaxErrorException: Access denied; you need (at least one of) the
-     *            ADMIN/OPERATOR privilege(s) for this operation
+     *            ADMIN/OPERATOR privilege(s) for this operation---导致了testSelectField及其后面的一系列方法无法执行，
+     *            这些方法都需要获取fenode
      */
+
 //    @Test
 //    public void testQueryFenodes(){
 //        String actual = catalog.queryFenodes();
@@ -254,16 +256,18 @@ public class CatalogTest {
     }
 
 
-
-    //暂时还有问题??????????????????????
+    /**
+     * 成功
+     * @throws TableNotExistException
+     * @throws TableAlreadyExistException
+     * @throws DatabaseNotExistException
+     */
     @Test
     @Ignore
     public void testCreateTable() throws TableNotExistException, TableAlreadyExistException,
             DatabaseNotExistException {
         //todo: Record primary key not null information
         ObjectPath tablePath = new ObjectPath(TEST_DB, TEST_TABLE);
-
-//        System.out.println(tablePath);
 
         catalog.dropTable(tablePath, true);
         catalog.createTable(tablePath, createTable(), true);
@@ -297,7 +301,13 @@ public class CatalogTest {
 
 
     /**
-     *暂时有问题?????????????????????????
+     * org.apache.flink.table.api.ValidationException: SQL validation failed. Failed getting fenodes
+     *
+     * Caused by: org.apache.flink.table.api.ValidationException: One or more required options are missing.
+     * Missing required options are:
+     * fenodes
+     *
+     * @return
      */
     @Test
     public void testSelectField() {

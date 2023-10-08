@@ -47,7 +47,7 @@ public class StarRocksConfigOptions {
             .key("starRocks.filter.query")
             .stringType()
             .noDefaultValue()
-            .withDescription("Filter expression of the query, which is transparently transmitted to Doris. Doris uses this expression to complete source-side data filtering");
+            .withDescription("Filter expression of the query, which is transparently transmitted to StarRocks. StarRocks uses this expression to complete source-side data filtering");
     public static final ConfigOption<Integer> STARROCKS_TABLET_SIZE = ConfigOptions
             .key("starRocks.request.tablet.size")
             .intType()
@@ -74,10 +74,10 @@ public class StarRocksConfigOptions {
             .defaultValue(STARROCKS_REQUEST_RETRIES_DEFAULT)
             .withDescription("");
     public static final ConfigOption<String> STARROCKS_FILTER_QUERY = ConfigOptions
-            .key("doris.filter.query")
+            .key("StarRocks.filter.query")
             .stringType()
             .noDefaultValue()
-            .withDescription("Filter expression of the query, which is transparently transmitted to Doris. Doris uses this expression to complete source-side data filtering");
+            .withDescription("Filter expression of the query, which is transparently transmitted to StarRocks. StarRocks uses this expression to complete source-side data filtering");
     public static final ConfigOption<Boolean> STARROCKS_DESERIALIZE_ARROW_ASYNC = ConfigOptions
             .key("starRocks.deserialize.arrow.async")
             .booleanType()
@@ -229,7 +229,7 @@ public class StarRocksConfigOptions {
             .withDescription("In the CDC scenario, when the primary key of the upstream is inconsistent with that of the downstream, the update-before data needs to be passed to the downstream as deleted data, otherwise the data cannot be deleted.\n" +
                     "The default is to ignore, that is, perform upsert semantics.");
 
-    // Prefix for Doris StreamLoad specific properties.
+    // Prefix for StarRocks StreamLoad specific properties.
     public static final String STREAM_LOAD_PROP_PREFIX = "sink.properties.";
 
     public static Properties getStreamLoadProp(Map<String, String> tableOptions) {

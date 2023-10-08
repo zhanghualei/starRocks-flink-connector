@@ -8,6 +8,13 @@
     <artifactId>starRocks-flink-connector</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+<!--    <scm>-->
+<!--        <connection>scm:git:https://github.com/StarRocks/starrocks-connector-for-apache-flink.git</connection>-->
+<!--        <developerConnection>scm:git:https://github.com/StarRocks/starrocks-connector-for-apache-flink.git</developerConnection>-->
+<!--        <url>scm:git:https://github.com/StarRocks/starrocks-connector-for-apache-flink.git</url>-->
+<!--        <tag>HEAD</tag>-->
+<!--    </scm>-->
+
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -223,6 +230,13 @@
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.starrocks/starrocks-thrift-sdk -->
+        <dependency>
+            <groupId>com.starrocks</groupId>
+            <artifactId>starrocks-thrift-sdk</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+
     </dependencies>
 
 

@@ -20,24 +20,34 @@ package com.nio.starRocks.flink.backend;
 import com.nio.starRocks.flink.cfg.ConfigurationOptions;
 import com.nio.starRocks.flink.cfg.StarRocksReadOptions;
 import com.nio.starRocks.flink.exception.ConnectedFailedException;
-//import com.nio.starRocks.flink.exception.StarRocksInternalException;
+import com.nio.starRocks.flink.exception.StarRocksInternalException;
 import com.nio.starRocks.flink.serialization.Routing;
 import com.nio.starRocks.flink.util.ErrorMessages;
-//import com.nio.starRocks.sdk.thrift.TStarRocksExternalService;
-//import com.nio.starRocks.sdk.thrift.TScanBatchResult;
-//import com.nio.starRocks.sdk.thrift.TScanCloseParams;
-//import com.nio.starRocks.sdk.thrift.TScanCloseResult;
-//import com.nio.starRocks.sdk.thrift.TScanNextBatchParams;
-//import com.nio.starRocks.sdk.thrift.TScanOpenParams;
-//import com.nio.starRocks.sdk.thrift.TScanOpenResult;
-//import com.nio.starRocks.sdk.thrift.TStatusCode;
-import org.apache.thrift.TConfiguration;
-import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
+import com.starrocks.thrift.TStarrocksExternalService;
+import com.starrocks.thrift.TScanBatchResult;
+import com.starrocks.thrift.TScanCloseParams;
+import com.starrocks.thrift.TScanCloseResult;
+import com.starrocks.thrift.TScanNextBatchParams;
+import com.starrocks.thrift.TScanOpenParams;
+import com.starrocks.thrift.TScanOpenResult;
+import com.starrocks.thrift.TStatusCode;
+
+/**
+ * 下面的这些修改对应着方法open的修改
+ */
+//import org.apache.thrift.TConfiguration;//没有这个
+//import org.apache.thrift.TException;
+//import org.apache.thrift.protocol.TBinaryProtocol;
+//import org.apache.thrift.protocol.TProtocol;
+//import org.apache.thrift.transport.TSocket;
+//import org.apache.thrift.transport.TTransport;
+//import org.apache.thrift.transport.TTransportException;
+import com.starrocks.shade.org.apache.thrift.TException;
+import com.starrocks.shade.org.apache.thrift.protocol.TBinaryProtocol;
+import com.starrocks.shade.org.apache.thrift.protocol.TProtocol;
+import com.starrocks.shade.org.apache.thrift.transport.TSocket;
+import com.starrocks.shade.org.apache.thrift.transport.TTransport;
+import com.starrocks.shade.org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +59,7 @@ public class BackendClient {
 
     private Routing routing;
 
-    private TStarRocksExternalService.Client client;
+    private TStarrocksExternalService.Client client;
     private TTransport transport;
 
     private boolean isConnected = false;
@@ -67,6 +77,37 @@ public class BackendClient {
         open();
     }
 
+    /**
+     * 此处为原来代码中的实现方式，但是因为protocol的继承方式有问题，改成用下面的方法进行测试
+     */
+//    private void open() {
+//        logger.debug("Open client to StarRocks BE '{}'.", routing);
+//        TException ex = null;
+//        for (int attempt = 0; attempt < retries; ++attempt) {
+//            logger.debug("Attempt {} to connect {}.", attempt, routing);
+//            try {
+//                TBinaryProtocol.Factory factory = new TBinaryProtocol.Factory();
+//                transport = new TSocket(new TConfiguration(), routing.getHost(), routing.getPort(), socketTimeout, connectTimeout);
+//                TProtocol protocol = factory.getProtocol(transport);
+//                client = new TStarrocksExternalService.Client(protocol);
+//                logger.trace("Connect status before open transport to {} is '{}'.", routing, isConnected);
+//                if (!transport.isOpen()) {
+//                    transport.open();
+//                    isConnected = true;
+//                    logger.info("Success connect to {}.", routing);
+//                    break;
+//                }
+//            } catch (TTransportException e) {
+//                logger.warn(ErrorMessages.CONNECT_FAILED_MESSAGE, routing, e);
+//                ex = e;
+//            }
+//        }
+//        if (!isConnected) {
+//            logger.error(ErrorMessages.CONNECT_FAILED_MESSAGE, routing);
+//            throw new ConnectedFailedException(routing.toString(), ex);
+//        }
+//    }
+
     private void open() {
         logger.debug("Open client to StarRocks BE '{}'.", routing);
         TException ex = null;
@@ -74,9 +115,9 @@ public class BackendClient {
             logger.debug("Attempt {} to connect {}.", attempt, routing);
             try {
                 TBinaryProtocol.Factory factory = new TBinaryProtocol.Factory();
-                transport = new TSocket(new TConfiguration(), routing.getHost(), routing.getPort(), socketTimeout, connectTimeout);
+                transport=new TSocket(routing.getHost(), routing.getPort(), socketTimeout, connectTimeout);
                 TProtocol protocol = factory.getProtocol(transport);
-                client = new TStarRocksExternalService.Client(protocol);
+                client = new TStarrocksExternalService.Client(protocol);
                 logger.trace("Connect status before open transport to {} is '{}'.", routing, isConnected);
                 if (!transport.isOpen()) {
                     transport.open();
@@ -94,6 +135,7 @@ public class BackendClient {
             throw new ConnectedFailedException(routing.toString(), ex);
         }
     }
+
 
     private void close() {
         logger.trace("Connect status before close with '{}' is '{}'.", routing, isConnected);
@@ -114,6 +156,35 @@ public class BackendClient {
      * @return scan open result
      * @throws ConnectedFailedException throw if cannot connect to starRocks BE
      */
+//    public TScanOpenResult openScanner(TScanOpenParams openParams) {
+//        logger.debug("OpenScanner to '{}', parameter is '{}'.", routing, openParams);
+//        if (!isConnected) {
+//            open();
+//        }
+//        TException ex = null;
+//        for (int attempt = 0; attempt < retries; ++attempt) {
+//            logger.debug("Attempt {} to openScanner {}.", attempt, routing);
+//            try {
+//                TScanOpenResult result = client.openScanner(openParams);
+//                if (result == null) {
+//                    logger.warn("Open scanner result from {} is null.", routing);
+//                    continue;
+//                }
+//                if (!TStatusCode.OK.equals(result.getStatus().getStatusCode())) {
+//                    logger.warn("The status of open scanner result from {} is '{}', error message is: {}.",
+//                            routing, result.getStatus().getStatusCode(), result.getStatus().getErrorMsgs());
+//                    continue;
+//                }
+//                return result;
+//            } catch (TException e) {
+//                logger.warn("Open scanner from {} failed.", routing, e);
+//                ex = e;
+//            }
+//        }
+//        logger.error(ErrorMessages.CONNECT_FAILED_MESSAGE, routing);
+//        throw new ConnectedFailedException(routing.toString(), ex);
+//    }
+
     public TScanOpenResult openScanner(TScanOpenParams openParams) {
         logger.debug("OpenScanner to '{}', parameter is '{}'.", routing, openParams);
         if (!isConnected) {
@@ -123,14 +194,14 @@ public class BackendClient {
         for (int attempt = 0; attempt < retries; ++attempt) {
             logger.debug("Attempt {} to openScanner {}.", attempt, routing);
             try {
-                TScanOpenResult result = client.openScanner(openParams);
+                TScanOpenResult result = client.open_scanner(openParams);
                 if (result == null) {
                     logger.warn("Open scanner result from {} is null.", routing);
                     continue;
                 }
-                if (!TStatusCode.OK.equals(result.getStatus().getStatusCode())) {
+                if (!TStatusCode.OK.equals(result.getStatus().getStatus_code())) {
                     logger.warn("The status of open scanner result from {} is '{}', error message is: {}.",
-                            routing, result.getStatus().getStatusCode(), result.getStatus().getErrorMsgs());
+                            routing, result.getStatus().getStatus_code(), result.getStatus().getError_msgs());
                     continue;
                 }
                 return result;
@@ -150,6 +221,42 @@ public class BackendClient {
      * @return scan batch result
      * @throws ConnectedFailedException throw if cannot connect to StarRocks BE
      */
+//    public TScanBatchResult getNext(TScanNextBatchParams nextBatchParams) {
+//        logger.debug("GetNext to '{}', parameter is '{}'.", routing, nextBatchParams);
+//        if (!isConnected) {
+//            open();
+//        }
+//        TException ex = null;
+//        TScanBatchResult result = null;
+//        for (int attempt = 0; attempt < retries; ++attempt) {
+//            logger.debug("Attempt {} to getNext {}.", attempt, routing);
+//            try {
+//                result = client.getNext(nextBatchParams);
+//                if (result == null) {
+//                    logger.warn("GetNext result from {} is null.", routing);
+//                    continue;
+//                }
+//                if (!TStatusCode.OK.equals(result.getStatus().getStatusCode())) {
+//                    logger.warn("The status of get next result from {} is '{}', error message is: {}.",
+//                            routing, result.getStatus().getStatusCode(), result.getStatus().getErrorMsgs());
+//                    continue;
+//                }
+//                return result;
+//            } catch (TException e) {
+//                logger.warn("Get next from {} failed.", routing, e);
+//                ex = e;
+//            }
+//        }
+//        if (result != null && (TStatusCode.OK != (result.getStatus().getStatusCode()))) {
+//            logger.error(ErrorMessages.StarRocks_INTERNAL_FAIL_MESSAGE, routing, result.getStatus().getStatusCode(),
+//                    result.getStatus().getErrorMsgs());
+//            throw new StarRocksInternalException(routing.toString(), result.getStatus().getStatusCode(),
+//                    result.getStatus().getErrorMsgs());
+//        }
+//        logger.error(ErrorMessages.CONNECT_FAILED_MESSAGE, routing);
+//        throw new ConnectedFailedException(routing.toString(), ex);
+//    }
+
     public TScanBatchResult getNext(TScanNextBatchParams nextBatchParams) {
         logger.debug("GetNext to '{}', parameter is '{}'.", routing, nextBatchParams);
         if (!isConnected) {
@@ -160,14 +267,14 @@ public class BackendClient {
         for (int attempt = 0; attempt < retries; ++attempt) {
             logger.debug("Attempt {} to getNext {}.", attempt, routing);
             try {
-                result = client.getNext(nextBatchParams);
+                result = client.get_next(nextBatchParams);
                 if (result == null) {
                     logger.warn("GetNext result from {} is null.", routing);
                     continue;
                 }
-                if (!TStatusCode.OK.equals(result.getStatus().getStatusCode())) {
+                if (!TStatusCode.OK.equals(result.getStatus().getStatus_code())) {
                     logger.warn("The status of get next result from {} is '{}', error message is: {}.",
-                            routing, result.getStatus().getStatusCode(), result.getStatus().getErrorMsgs());
+                            routing, result.getStatus().getStatus_code(), result.getStatus().getError_msgs());
                     continue;
                 }
                 return result;
@@ -176,11 +283,11 @@ public class BackendClient {
                 ex = e;
             }
         }
-        if (result != null && (TStatusCode.OK != (result.getStatus().getStatusCode()))) {
-            logger.error(ErrorMessages.StarRocks_INTERNAL_FAIL_MESSAGE, routing, result.getStatus().getStatusCode(),
-                    result.getStatus().getErrorMsgs());
-            throw new StarRocksInternalException(routing.toString(), result.getStatus().getStatusCode(),
-                    result.getStatus().getErrorMsgs());
+        if (result != null && (TStatusCode.OK != (result.getStatus().getStatus_code()))) {
+            logger.error(ErrorMessages.STARROCKS_INTERNAL_FAIL_MESSAGE, routing, result.getStatus().getStatus_code(),
+                    result.getStatus().getError_msgs());
+            throw new StarRocksInternalException(routing.toString(), result.getStatus().getStatus_code(),
+                    result.getStatus().getError_msgs());
         }
         logger.error(ErrorMessages.CONNECT_FAILED_MESSAGE, routing);
         throw new ConnectedFailedException(routing.toString(), ex);
@@ -191,19 +298,42 @@ public class BackendClient {
      *
      * @param closeParams thrift struct to required by request
      */
+//    public void closeScanner(TScanCloseParams closeParams) {
+//        logger.debug("CloseScanner to '{}', parameter is '{}'.", routing, closeParams);
+//        for (int attempt = 0; attempt < retries; ++attempt) {
+//            logger.debug("Attempt {} to closeScanner {}.", attempt, routing);
+//            try {
+//                TScanCloseResult result = client.closeScanner(closeParams);
+//                if (result == null) {
+//                    logger.warn("CloseScanner result from {} is null.", routing);
+//                    continue;
+//                }
+//                if (!TStatusCode.OK.equals(result.getStatus().getStatusCode())) {
+//                    logger.warn("The status of get next result from {} is '{}', error message is: {}.",
+//                            routing, result.getStatus().getStatusCode(), result.getStatus().getErrorMsgs());
+//                    continue;
+//                }
+//                break;
+//            } catch (TException e) {
+//                logger.warn("Close scanner from {} failed.", routing, e);
+//            }
+//        }
+//        logger.info("CloseScanner to StarRocks BE '{}' success.", routing);
+//        close();
+//    }
     public void closeScanner(TScanCloseParams closeParams) {
         logger.debug("CloseScanner to '{}', parameter is '{}'.", routing, closeParams);
         for (int attempt = 0; attempt < retries; ++attempt) {
             logger.debug("Attempt {} to closeScanner {}.", attempt, routing);
             try {
-                TScanCloseResult result = client.closeScanner(closeParams);
+                TScanCloseResult result = client.close_scanner(closeParams);
                 if (result == null) {
                     logger.warn("CloseScanner result from {} is null.", routing);
                     continue;
                 }
-                if (!TStatusCode.OK.equals(result.getStatus().getStatusCode())) {
+                if (!TStatusCode.OK.equals(result.getStatus().getStatus_code())) {
                     logger.warn("The status of get next result from {} is '{}', error message is: {}.",
-                            routing, result.getStatus().getStatusCode(), result.getStatus().getErrorMsgs());
+                            routing, result.getStatus().getStatus_code(), result.getStatus().getError_msgs());
                     continue;
                 }
                 break;

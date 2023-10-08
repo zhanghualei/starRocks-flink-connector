@@ -81,6 +81,89 @@ public class MysqlType {
     private static final String JSON = "JSON";
     private static final String ENUM = "ENUM";
 
+//    public static String toStarRocksType(String type, Integer length, Integer scale) {
+//        switch (type.toUpperCase()) {
+//            case BIT:
+//            case BOOLEAN:
+//            case BOOL:
+//                return StarRocksType.BOOLEAN;
+//            case TINYINT:
+//                return StarRocksType.TINYINT;
+//            case TINYINT_UNSIGNED:
+//            case TINYINT_UNSIGNED_ZEROFILL:
+//            case SMALLINT:
+//                return StarRocksType.SMALLINT;
+//            case SMALLINT_UNSIGNED:
+//            case SMALLINT_UNSIGNED_ZEROFILL:
+//            case INT:
+//            case MEDIUMINT:
+//            case YEAR:
+//                return StarRocksType.INT;
+//            case INT_UNSIGNED:
+//            case INT_UNSIGNED_ZEROFILL:
+//            case MEDIUMINT_UNSIGNED:
+//            case MEDIUMINT_UNSIGNED_ZEROFILL:
+//            case BIGINT:
+//                return StarRocksType.BIGINT;
+//            case BIGINT_UNSIGNED:
+//            case BIGINT_UNSIGNED_ZEROFILL:
+//                return StarRocksType.LARGEINT;
+//            case FLOAT:
+//            case FLOAT_UNSIGNED:
+//            case FLOAT_UNSIGNED_ZEROFILL:
+//                return StarRocksType.FLOAT;
+//            case REAL:
+//            case REAL_UNSIGNED:
+//            case REAL_UNSIGNED_ZEROFILL:
+//            case DOUBLE:
+//            case DOUBLE_UNSIGNED:
+//            case DOUBLE_UNSIGNED_ZEROFILL:
+//            case DOUBLE_PRECISION:
+//            case DOUBLE_PRECISION_UNSIGNED:
+//            case DOUBLE_PRECISION_UNSIGNED_ZEROFILL:
+//                return StarRocksType.DOUBLE;
+//            case NUMERIC:
+//            case NUMERIC_UNSIGNED:
+//            case NUMERIC_UNSIGNED_ZEROFILL:
+//            case FIXED:
+//            case FIXED_UNSIGNED:
+//            case FIXED_UNSIGNED_ZEROFILL:
+//            case DECIMAL:
+//            case DECIMAL_UNSIGNED:
+//            case DECIMAL_UNSIGNED_ZEROFILL:
+//                return length != null && length <= 38
+//                        ? String.format("%s(%s,%s)", StarRocksType.DECIMAL_V3, length, scale != null && scale >= 0 ? scale : 0)
+//                        : StarRocksType.STRING;
+//            case DATE:
+//                return StarRocksType.DATE_V2;
+//            case DATETIME:
+//            case TIMESTAMP:
+//                return String.format("%s(%s)", StarRocksType.DATETIME_V2, Math.min(length == null ? 0 : length, 6));
+//            case CHAR:
+//            case VARCHAR:
+//                Preconditions.checkNotNull(length);
+//                return length * 3 > 65533 ? StarRocksType.STRING : String.format("%s(%s)", StarRocksType.VARCHAR, length * 3);
+//            case TINYTEXT:
+//            case TEXT:
+//            case MEDIUMTEXT:
+//            case LONGTEXT:
+//            case ENUM:
+//            case TIME:
+//            case TINYBLOB:
+//            case BLOB:
+//            case MEDIUMBLOB:
+//            case LONGBLOB:
+//            case BINARY:
+//            case VARBINARY:
+//                return StarRocksType.STRING;
+//            case JSON:
+//                return StarRocksType.JSONB;
+//            default:
+//                throw new UnsupportedOperationException("Unsupported MySQL Type: " + type);
+//        }
+//
+//    }
+
     public static String toStarRocksType(String type, Integer length, Integer scale) {
         switch (type.toUpperCase()) {
             case BIT:
@@ -106,8 +189,6 @@ public class MysqlType {
             case BIGINT:
                 return StarRocksType.BIGINT;
             case BIGINT_UNSIGNED:
-            case BIGINT_UNSIGNED_ZEROFILL:
-                return StarRocksType.LARGEINT;
             case FLOAT:
             case FLOAT_UNSIGNED:
             case FLOAT_UNSIGNED_ZEROFILL:
@@ -132,13 +213,13 @@ public class MysqlType {
             case DECIMAL_UNSIGNED:
             case DECIMAL_UNSIGNED_ZEROFILL:
                 return length != null && length <= 38
-                        ? String.format("%s(%s,%s)", StarRocksType.DECIMAL_V3, length, scale != null && scale >= 0 ? scale : 0)
+                        ? String.format("%s(%s,%s)", StarRocksType.DECIMAL, length, scale != null && scale >= 0 ? scale : 0)
                         : StarRocksType.STRING;
             case DATE:
-                return StarRocksType.DATE_V2;
+                return StarRocksType.DATE;
             case DATETIME:
             case TIMESTAMP:
-                return String.format("%s(%s)", StarRocksType.DATETIME_V2, Math.min(length == null ? 0 : length, 6));
+                return String.format("%s(%s)", StarRocksType.DATETIME, Math.min(length == null ? 0 : length, 6));
             case CHAR:
             case VARCHAR:
                 Preconditions.checkNotNull(length);

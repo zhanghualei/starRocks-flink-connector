@@ -28,11 +28,11 @@ import com.nio.starRocks.flink.rest.SchemaUtils;
 import com.nio.starRocks.flink.rest.models.Schema;
 import com.nio.starRocks.flink.serialization.Routing;
 import com.nio.starRocks.flink.serialization.RowBatch;
-import com.nio.starRocks.sdk.thrift.TScanBatchResult;
-import com.nio.starRocks.sdk.thrift.TScanCloseParams;
-import com.nio.starRocks.sdk.thrift.TScanNextBatchParams;
-import com.nio.starRocks.sdk.thrift.TScanOpenParams;
-import com.nio.starRocks.sdk.thrift.TScanOpenResult;
+import com.starrocks.thrift.TScanBatchResult;
+import com.starrocks.thrift.TScanCloseParams;
+import com.starrocks.thrift.TScanNextBatchParams;
+import com.starrocks.thrift.TScanOpenParams;
+import com.starrocks.thrift.TScanOpenResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +51,7 @@ import static com.nio.starRocks.flink.cfg.ConfigurationOptions.STARROCKS_DESERIA
 import static com.nio.starRocks.flink.cfg.ConfigurationOptions.STARROCKS_EXEC_MEM_LIMIT_DEFAULT;
 import static com.nio.starRocks.flink.cfg.ConfigurationOptions.STARROCKS_REQUEST_QUERY_TIMEOUT_S_DEFAULT;
 import static com.nio.starRocks.flink.util.ErrorMessages.SHOULD_NOT_HAPPEN_MESSAGE;
+import static com.starrocks.thrift.TScanOpenResult._Fields.CONTEXT_ID;
 
 public class StarRocksValueReader implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(StarRocksValueReader.class);
@@ -88,19 +89,34 @@ public class StarRocksValueReader implements AutoCloseable {
         init();
     }
 
+//    private void init() {
+//        clientLock.lock();
+//        try {
+//            this.openParams = openParams();
+//            TScanOpenResult openResult = this.client.openScanner(this.openParams);
+//            this.contextId = openResult.getContextId();
+//            this.schema = SchemaUtils.convertToSchema(openResult.getSelectedColumns());
+//        } finally {
+//            clientLock.unlock();
+//        }
+//        this.asyncThreadStarted = asyncThreadStarted();
+//        LOG.debug("Open scan result is, contextId: {}, schema: {}.", contextId, schema);
+//    }
+
     private void init() {
         clientLock.lock();
         try {
             this.openParams = openParams();
             TScanOpenResult openResult = this.client.openScanner(this.openParams);
-            this.contextId = openResult.getContextId();
-            this.schema = SchemaUtils.convertToSchema(openResult.getSelectedColumns());
+            this.contextId = openResult.getContext_id();
+            this.schema = SchemaUtils.convertToSchema(openResult.getSelected_columns());
         } finally {
             clientLock.unlock();
         }
         this.asyncThreadStarted = asyncThreadStarted();
         LOG.debug("Open scan result is, contextId: {}, schema: {}.", contextId, schema);
     }
+
 
     private BackendClient backendClient() {
         try {
@@ -110,6 +126,28 @@ public class StarRocksValueReader implements AutoCloseable {
             throw new StarRocksRuntimeException(e);
         }
     }
+
+//    private TScanOpenParams openParams() {
+//        TScanOpenParams params = new TScanOpenParams();
+//        params.cluster = STARROCKS_DEFAULT_CLUSTER;
+//        params.database = partition.getDatabase();
+//        params.table = partition.getTable();
+//
+//        params.tablet_ids = Arrays.asList(partition.getTabletIds().toArray(new Long[]{}));
+//        params.opaqued_query_plan = partition.getQueryPlan();
+//        // max row number of one read batch
+//        Integer batchSize = readOptions.getRequestBatchSize() == null ? STARROCKS_BATCH_SIZE_DEFAULT : readOptions.getRequestBatchSize();
+//        Integer queryStarRocksTimeout = readOptions.getRequestQueryTimeoutS() == null ? STARROCKS_REQUEST_QUERY_TIMEOUT_S_DEFAULT : readOptions.getRequestQueryTimeoutS();
+//        Long execMemLimit = readOptions.getExecMemLimit() == null ? STARROCKS_EXEC_MEM_LIMIT_DEFAULT : readOptions.getExecMemLimit();
+//        params.setBatchSize(batchSize);
+//        params.setQueryTimeout(queryStarRocksTimeout);
+//        params.setMemLimit(execMemLimit);
+//        params.setUser(options.getUsername());
+//        params.setPasswd(options.getPassword());
+//        LOG.debug("Open scan params is,cluster:{},database:{},table:{},tabletId:{},batch size:{},query timeout:{},execution memory limit:{},user:{},query plan: {}",
+//                params.getCluster(), params.getDatabase(), params.getTable(), params.getTabletIds(), params.getBatchSize(), params.getQueryTimeout(), params.getMemLimit(), params.getUser(), params.getOpaquedQueryPlan());
+//        return params;
+//    }
 
     private TScanOpenParams openParams() {
         TScanOpenParams params = new TScanOpenParams();
@@ -123,15 +161,43 @@ public class StarRocksValueReader implements AutoCloseable {
         Integer batchSize = readOptions.getRequestBatchSize() == null ? STARROCKS_BATCH_SIZE_DEFAULT : readOptions.getRequestBatchSize();
         Integer queryStarRocksTimeout = readOptions.getRequestQueryTimeoutS() == null ? STARROCKS_REQUEST_QUERY_TIMEOUT_S_DEFAULT : readOptions.getRequestQueryTimeoutS();
         Long execMemLimit = readOptions.getExecMemLimit() == null ? STARROCKS_EXEC_MEM_LIMIT_DEFAULT : readOptions.getExecMemLimit();
-        params.setBatchSize(batchSize);
-        params.setQueryTimeout(queryStarRocksTimeout);
-        params.setMemLimit(execMemLimit);
+        params.setBatch_size(batchSize);
+        params.setQuery_timeout(queryStarRocksTimeout);
+        params.setMem_limit(execMemLimit);
         params.setUser(options.getUsername());
         params.setPasswd(options.getPassword());
         LOG.debug("Open scan params is,cluster:{},database:{},table:{},tabletId:{},batch size:{},query timeout:{},execution memory limit:{},user:{},query plan: {}",
-                params.getCluster(), params.getDatabase(), params.getTable(), params.getTabletIds(), params.getBatchSize(), params.getQueryTimeout(), params.getMemLimit(), params.getUser(), params.getOpaquedQueryPlan());
+                params.getCluster(), params.getDatabase(), params.getTable(), params.getTablet_ids(), params.getBatch_size(), params.getQuery_timeout(), params.getMem_limit(), params.getUser(), params.getOpaqued_query_plan());
         return params;
     }
+
+//    protected Thread asyncThread = new Thread(new Runnable() {
+//        @Override
+//        public void run() {
+//            clientLock.lock();
+//            try{
+//                TScanNextBatchParams nextBatchParams = new TScanNextBatchParams();
+//                nextBatchParams.setContextId(contextId);
+//                while (!eos.get()) {
+//                    nextBatchParams.setOffset(offset);
+//                    TScanBatchResult nextResult = client.getNext(nextBatchParams);
+//                    eos.set(nextResult.isEos());
+//                    if (!eos.get()) {
+//                        RowBatch rowBatch = new RowBatch(nextResult, schema).readArrow();
+//                        offset += rowBatch.getReadRowCount();
+//                        rowBatch.close();
+//                        try {
+//                            rowBatchBlockingQueue.put(rowBatch);
+//                        } catch (InterruptedException e) {
+//                            throw new StarRocksRuntimeException(e);
+//                        }
+//                    }
+//                }
+//            } finally {
+//                clientLock.unlock();
+//            }
+//        }
+//    });
 
     protected Thread asyncThread = new Thread(new Runnable() {
         @Override
@@ -139,7 +205,7 @@ public class StarRocksValueReader implements AutoCloseable {
             clientLock.lock();
             try{
                 TScanNextBatchParams nextBatchParams = new TScanNextBatchParams();
-                nextBatchParams.setContextId(contextId);
+                nextBatchParams.setContext_id(contextId);
                 while (!eos.get()) {
                     nextBatchParams.setOffset(offset);
                     TScanBatchResult nextResult = client.getNext(nextBatchParams);
@@ -175,6 +241,57 @@ public class StarRocksValueReader implements AutoCloseable {
      *
      * @return true if hax next value
      */
+//    public boolean hasNext() {
+//        boolean hasNext = false;
+//        if (deserializeArrowToRowBatchAsync && asyncThreadStarted) {
+//            // support deserialize Arrow to RowBatch asynchronously
+//            if (rowBatch == null || !rowBatch.hasNext()) {
+//                while (!eos.get() || !rowBatchBlockingQueue.isEmpty()) {
+//                    if (!rowBatchBlockingQueue.isEmpty()) {
+//                        try {
+//                            rowBatch = rowBatchBlockingQueue.take();
+//                        } catch (InterruptedException e) {
+//                            throw new StarRocksRuntimeException(e);
+//                        }
+//                        hasNext = true;
+//                        break;
+//                    } else {
+//                        // wait for rowBatch put in queue or eos change
+//                        try {
+//                            Thread.sleep(5);
+//                        } catch (InterruptedException e) {
+//                        }
+//                    }
+//                }
+//            } else {
+//                hasNext = true;
+//            }
+//        } else {
+//            clientLock.lock();
+//            try{
+//                // Arrow data was acquired synchronously during the iterative process
+//                if (!eos.get() && (rowBatch == null || !rowBatch.hasNext())) {
+//                    if (rowBatch != null) {
+//                        offset += rowBatch.getReadRowCount();
+//                        rowBatch.close();
+//                    }
+//                    TScanNextBatchParams nextBatchParams = new TScanNextBatchParams();
+//                    nextBatchParams.setContextId(contextId);
+//                    nextBatchParams.setOffset(offset);
+//                    TScanBatchResult nextResult = client.getNext(nextBatchParams);
+//                    eos.set(nextResult.isEos());
+//                    if (!eos.get()) {
+//                        rowBatch = new RowBatch(nextResult, schema).readArrow();
+//                    }
+//                }
+//                hasNext = !eos.get();
+//            } finally {
+//                clientLock.unlock();
+//            }
+//        }
+//        return hasNext;
+//    }
+
     public boolean hasNext() {
         boolean hasNext = false;
         if (deserializeArrowToRowBatchAsync && asyncThreadStarted) {
@@ -210,7 +327,7 @@ public class StarRocksValueReader implements AutoCloseable {
                         rowBatch.close();
                     }
                     TScanNextBatchParams nextBatchParams = new TScanNextBatchParams();
-                    nextBatchParams.setContextId(contextId);
+                    nextBatchParams.setContext_id(contextId);
                     nextBatchParams.setOffset(offset);
                     TScanBatchResult nextResult = client.getNext(nextBatchParams);
                     eos.set(nextResult.isEos());
@@ -239,12 +356,24 @@ public class StarRocksValueReader implements AutoCloseable {
         return rowBatch.next();
     }
 
+//    @Override
+//    public void close() throws Exception {
+//        clientLock.lock();
+//        try {
+//            TScanCloseParams closeParams = new TScanCloseParams();
+//            closeParams.setContextId(contextId);
+//            client.closeScanner(closeParams);
+//        } finally {
+//            clientLock.unlock();
+//        }
+//    }
+
     @Override
     public void close() throws Exception {
         clientLock.lock();
         try {
             TScanCloseParams closeParams = new TScanCloseParams();
-            closeParams.setContextId(contextId);
+            closeParams.setContext_id(contextId);
             client.closeScanner(closeParams);
         } finally {
             clientLock.unlock();
